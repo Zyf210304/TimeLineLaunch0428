@@ -8,9 +8,29 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @StateObject var vm = ViewModel()
+    
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        
+        TimelineView(.animation) { timeline in
+            
+            Canvas { context, size in
+                let  timeLineData = timeline.date.timeIntervalSinceReferenceDate
+                vm.particleSystem.update(date: timeLineData)
+                
+                for particle in vm.particleSystem.particles {
+                    
+                    let xPos = particle.x * size.width
+                    let yPos = particle.y * size.height
+                    
+                    var contextCopy = context
+                    contextCopy.addFilter(.colorMultiply(Color(hue: particle.hue, saturation: 1, brightness: 1  )))
+                    contextCopy.opacity = 1 - (timeLineData - particle.creationDate)
+                    contextCopy.draw(vm.particleSystem.image, at: CGPoint(x: xPos, y: yPos))
+                }
+            }
+        }
     }
 }
 
